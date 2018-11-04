@@ -13,7 +13,7 @@ var addRecipientTests = []struct {
 	{"Person3"},
 }
 
-func TestAddRecipeint(t *testing.T) {
+func TestAddRecipient(t *testing.T) {
 	for _, tt := range addRecipientTests {
 		t.Run(fmt.Sprintf("%s", tt.recipient), func(t *testing.T) {
 			sut, _ := NewRotation()
@@ -40,6 +40,7 @@ func TestRotation_AddGiver(t *testing.T) {
 	}
 	type args struct {
 		giver string
+		year  string
 	}
 	tests := []struct {
 		name    string
@@ -47,7 +48,37 @@ func TestRotation_AddGiver(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "valid currentRecipient",
+			fields: fields{
+				recipientGiver: map[string]string{},
+				Recipients:     map[string]*Gift{},
+				currentRecipient: &Gift{
+					Recipient: "testRecipient",
+					Givers:    map[string]string{},
+				},
+				allMembers: map[string]bool{},
+			},
+			args: args{
+				giver: "test",
+				year:  "2018",
+			},
+			wantErr: false,
+		},
+		{
+			name: "nil currentRecipient",
+			fields: fields{
+				recipientGiver:   map[string]string{},
+				Recipients:       map[string]*Gift{},
+				currentRecipient: nil,
+				allMembers:       map[string]bool{},
+			},
+			args: args{
+				giver: "test",
+				year:  "2018",
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -57,7 +88,7 @@ func TestRotation_AddGiver(t *testing.T) {
 				currentRecipient: tt.fields.currentRecipient,
 				allMembers:       tt.fields.allMembers,
 			}
-			if err := r.AddGiver(tt.args.giver); (err != nil) != tt.wantErr {
+			if err := r.AddGiver(tt.args.giver, tt.args.year); (err != nil) != tt.wantErr {
 				t.Errorf("Rotation.AddGiver() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})

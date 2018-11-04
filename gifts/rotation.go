@@ -40,10 +40,12 @@ func (r *Rotation) AddRecipient(recipient string) error {
 }
 
 // AddGiver adds a new giver to the current recipient
-func (r *Rotation) AddGiver(giver string) error {
+func (r *Rotation) AddGiver(giver, year string) error {
 	if r.currentRecipient == nil {
 		return fmt.Errorf("current recipient is null")
 	}
+
+	r.currentRecipient.AddGiver(giver, year)
 
 	return nil
 }

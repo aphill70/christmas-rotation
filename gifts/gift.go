@@ -5,7 +5,7 @@ import (
 )
 
 type (
-	// Gift represents a reciepient and history of givers
+	// Gift represents a recipient and history of givers
 	Gift struct {
 		Recipient string
 
