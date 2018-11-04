@@ -47,5 +47,9 @@ func (r *Rotation) AddGiver(giver, year string) error {
 
 	r.currentRecipient.AddGiver(giver, year)
 
+	if !r.allMembers[giver] {
+		r.allMembers[giver] = true
+	}
+
 	return nil
 }
