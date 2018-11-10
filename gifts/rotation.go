@@ -83,7 +83,7 @@ func (r *Rotation) GetEligibleGivers(recipient string) error {
 }
 
 func normalizeName(name string) string {
-	normalized := strings.ToLower(name)
+	normalized := strings.Trim(strings.ToLower(name), " ")
 
 	if strings.HasPrefix(normalized, "chris") {
 		return "christopher"
