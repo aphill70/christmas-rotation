@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/aphill70/sheet-rotation/gifts"
 	"golang.org/x/net/context"
@@ -92,28 +93,46 @@ func main() {
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
 	}
 
+	var rotations []*gifts.Rotation
+	var currentRotation *gifts.Rotation
 	if len(resp.Values) == 0 {
 		fmt.Println("No data found.")
 	} else {
 		columnMap := make(map[int]string)
 
-		var currentRotation *gifts.Rotation
 		for rowIndex, row := range resp.Values {
 			if len(row) == 0 || rowIndex == 0 {
-				fmt.Println("found empty row")
-				// create new Rotation
+				fmt.Println("found empty row initializing new rotation")
+				if currentRotation != nil {
+					rotations = append(rotations, currentRotation)
+				}
 				currentRotation, _ = gifts.NewRotation()
 			}
 
 			for column, cell := range row {
 				if rowIndex == 0 {
+					// handle headers
 					columnMap[column] = fmt.Sprintf("%s", cell)
-					currentRotation.AddRecipient(fmt.Sprintf("%s", cell))
 				} else {
+					if columnMap[column] == "Name" {
+						currentRotation.AddRecipient(fmt.Sprintf("%s", cell))
+					} else {
+						giver := fmt.Sprintf("%s", cell)
+						if !strings.Contains(giver, "X") {
+							currentRotation.AddGiver(giver, columnMap[column])
+						}
+					}
+
 					fmt.Printf(" %s:%s ", columnMap[column], cell)
 				}
 			}
 			fmt.Println("")
+		}
+		if len(rotations) > 0 {
+			err := rotations[0].GetEligibleGivers("Pop")
+			if err != nil {
+				os.Exit(1)
+			}
 		}
 	}
 }

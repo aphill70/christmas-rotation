@@ -9,7 +9,8 @@ type (
 	Gift struct {
 		Recipient string
 
-		Givers map[string]string
+		Givers    map[string]string
+		altGivers map[string]bool
 	}
 )
 
@@ -22,10 +23,12 @@ func NewGift(recipient string) (*Gift, error) {
 	return &Gift{
 		Recipient: recipient,
 		Givers:    make(map[string]string),
+		altGivers: make(map[string]bool),
 	}, nil
 }
 
 // AddGiver adds a new giver to the Gift
 func (g *Gift) AddGiver(giver, year string) {
 	g.Givers[year] = giver
+	g.altGivers[giver] = true
 }
