@@ -93,8 +93,9 @@ func main() {
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
 	}
 
-	f, err := os.Open("./rules.json")
+	f, err := os.Open("rules.json")
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
