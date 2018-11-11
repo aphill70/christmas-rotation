@@ -1,59 +1,163 @@
 package gifts
 
 import (
-	"fmt"
+	"reflect"
 	"testing"
 )
 
-var addGiverTests = []struct {
-	recipient string
-	giver     string
-	year      string
-}{
-	{"Person1", "Giver1", "2009"},
-}
-
-var newGiftTests = []struct {
-	in        string
-	recipient string
-
-	err bool
-}{
-	{"Person1", "Person1", false},
-	{"", "", true},
-}
-
-func TestAddGiver(t *testing.T) {
-	for _, tt := range addGiverTests {
-		t.Run(fmt.Sprintf("%s/%s", tt.recipient, tt.giver), func(t *testing.T) {
-			sut, _ := NewGift(tt.recipient)
-			if sut != nil && sut.Recipient != tt.recipient {
-				t.Errorf("got %q, want %q", sut.Recipient, tt.recipient)
+func TestNewGift(t *testing.T) {
+	type args struct {
+		recipient string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    *Gift
+		wantErr bool
+	}{
+		{
+			name: "valid",
+			args: args{
+				recipient: "bob",
+			},
+			want: &Gift{
+				Recipient: "bob",
+				History:   map[string]string{},
+				Givers:    map[string]bool{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "chris/valid",
+			args: args{
+				recipient: "chris",
+			},
+			want: &Gift{
+				Recipient: "christopher",
+				History:   map[string]string{},
+				Givers:    map[string]bool{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "christopher/valid",
+			args: args{
+				recipient: "christopher",
+			},
+			want: &Gift{
+				Recipient: "christopher",
+				History:   map[string]string{},
+				Givers:    map[string]bool{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "micheal/valid",
+			args: args{
+				recipient: "micheal",
+			},
+			want: &Gift{
+				Recipient: "michael",
+				History:   map[string]string{},
+				Givers:    map[string]bool{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "michael/valid",
+			args: args{
+				recipient: "michael",
+			},
+			want: &Gift{
+				Recipient: "michael",
+				History:   map[string]string{},
+				Givers:    map[string]bool{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "michael/space/valid",
+			args: args{
+				recipient: "michael ",
+			},
+			want: &Gift{
+				Recipient: "michael",
+				History:   map[string]string{},
+				Givers:    map[string]bool{},
+			},
+			wantErr: false,
+		},
+		{
+			name: "invalid",
+			args: args{
+				recipient: "",
+			},
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewGift(tt.args.recipient)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewGift() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
-
-			if sut != nil && len(sut.Givers) != 0 {
-				t.Error("Didn't initialize Gift correctly")
-			}
-
-			sut.AddGiver(tt.giver, tt.year)
-
-			if sut != nil && tt.giver != "" && len(sut.Givers) == 0 {
-				t.Error("Giver was not added correctly")
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewGift() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestNewGift(t *testing.T) {
-	for _, tt := range newGiftTests {
-		t.Run(tt.in, func(t *testing.T) {
-			sut, err := NewGift(tt.in)
-			if (err == nil) == tt.err {
-				t.Fail()
+func TestGift_AddGiver(t *testing.T) {
+	type fields struct {
+		Recipient string
+		History   map[string]string
+		Givers    map[string]bool
+	}
+	type args struct {
+		giver string
+		year  string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "valid",
+			fields: fields{
+				Recipient: "bob",
+				History:   map[string]string{"2002": "jane", "2003": "bill"},
+				Givers:    map[string]bool{"jane": true, "bill": true},
+			},
+			args:    args{giver: "jill", year: "2004"},
+			wantErr: false,
+		},
+		{
+			name: "repeatYear",
+			fields: fields{
+				Recipient: "bob",
+				History:   map[string]string{"2002": "jane", "2003": "bill"},
+				Givers:    map[string]bool{"jane": true, "bill": true},
+			},
+			args:    args{giver: "jill", year: "2002"},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := &Gift{
+				Recipient: tt.fields.Recipient,
+				History:   tt.fields.History,
+				Givers:    tt.fields.Givers,
 			}
-
-			if sut != nil && sut.Recipient != tt.recipient {
-				t.Errorf("got %q, want %q", sut.Recipient, tt.recipient)
+			err := g.AddGiver(tt.args.giver, tt.args.year)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewGift() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
 		})
 	}

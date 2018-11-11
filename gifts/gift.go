@@ -9,8 +9,8 @@ type (
 	Gift struct {
 		Recipient string
 
-		Givers    map[string]string
-		altGivers map[string]bool
+		History map[string]string
+		Givers  map[string]bool
 	}
 )
 
@@ -21,14 +21,21 @@ func NewGift(recipient string) (*Gift, error) {
 	}
 
 	return &Gift{
-		Recipient: recipient,
-		Givers:    make(map[string]string),
-		altGivers: make(map[string]bool),
+		Recipient: normalizeName(recipient),
+		History:   make(map[string]string),
+		Givers:    make(map[string]bool),
 	}, nil
 }
 
 // AddGiver adds a new giver to the Gift
-func (g *Gift) AddGiver(giver, year string) {
-	g.Givers[year] = giver
-	g.altGivers[giver] = true
+func (g *Gift) AddGiver(giver, year string) error {
+	normalizedGiver := normalizeName(giver)
+	if g.History[year] != "" {
+		return fmt.Errorf("cannot duplicate years. giver for year %s already exists", year)
+	}
+
+	g.History[year] = normalizedGiver
+	g.Givers[normalizedGiver] = true
+
+	return nil
 }

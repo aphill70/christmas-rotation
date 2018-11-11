@@ -2,27 +2,29 @@ package gifts
 
 import (
 	"fmt"
-	"strings"
 )
 
 type (
 	// Rotation represents the gift rotation
 	Rotation struct {
-		recipientGiver map[string]string
+		RecipientToGiver map[string]string
+		Recipients       map[string]*Gift
+		Members          map[string]bool
 
-		Recipients map[string]*Gift
+		Rules *Rules
 
 		currentRecipient *Gift
-
-		allMembers map[string]bool
 	}
 )
 
 // NewRotation creates a new GiftRotation object
-func NewRotation() (*Rotation, error) {
+func NewRotation(rules *Rules) (*Rotation, error) {
 	return &Rotation{
-		allMembers: make(map[string]bool),
-		Recipients: make(map[string]*Gift),
+		Members:          make(map[string]bool),
+		Recipients:       make(map[string]*Gift),
+		RecipientToGiver: make(map[string]string),
+
+		Rules: rules,
 	}, nil
 }
 
@@ -37,8 +39,8 @@ func (r *Rotation) AddRecipient(recipient string) error {
 	r.currentRecipient = gift
 	r.Recipients[recipient] = gift
 
-	if !r.allMembers[recipient] {
-		r.allMembers[recipient] = true
+	if !r.Members[recipient] {
+		r.Members[recipient] = true
 	}
 
 	return nil
@@ -53,8 +55,8 @@ func (r *Rotation) AddGiver(giver, year string) error {
 
 	r.currentRecipient.AddGiver(giver, year)
 
-	if !r.allMembers[giver] {
-		r.allMembers[giver] = true
+	if !r.Members[giver] {
+		r.Members[giver] = true
 	}
 
 	return nil
@@ -63,14 +65,14 @@ func (r *Rotation) AddGiver(giver, year string) error {
 // GetEligibleGivers returns all valid givers for a given recipient
 func (r *Rotation) GetEligibleGivers(recipient string) error {
 	recipient = normalizeName(recipient)
-	if !r.allMembers[recipient] || r.Recipients[recipient] == nil {
+	if !r.Members[recipient] || r.Recipients[recipient] == nil {
 		return fmt.Errorf("Invalid Recipient: %s", recipient)
 	}
 
 	gift := r.Recipients[recipient]
 	var eligibleMembers = make(map[string]bool)
-	for member := range r.allMembers {
-		if member == recipient || gift.altGivers[member] {
+	for member := range r.Members {
+		if member == recipient || gift.Givers[member] {
 			continue
 		}
 
@@ -80,14 +82,4 @@ func (r *Rotation) GetEligibleGivers(recipient string) error {
 	fmt.Printf("\n%+v\n", eligibleMembers)
 
 	return nil
-}
-
-func normalizeName(name string) string {
-	normalized := strings.Trim(strings.ToLower(name), " ")
-
-	if strings.HasPrefix(normalized, "chris") {
-		return "christopher"
-	}
-
-	return normalized
 }
