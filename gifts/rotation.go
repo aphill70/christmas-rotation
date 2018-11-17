@@ -2,6 +2,7 @@ package gifts
 
 import (
 	"fmt"
+	"sort"
 )
 
 type (
@@ -68,10 +69,10 @@ func (r *Rotation) AddGiver(giver, year string) error {
 }
 
 // GetEligibleGivers returns all valid givers for a given recipient
-func (r *Rotation) GetEligibleGivers(recipient string) error {
+func (r *Rotation) GetEligibleGivers(recipient string) (map[string]bool, error) {
 	recipient = normalizeName(recipient)
 	if !r.Members[recipient] || r.Recipients[recipient] == nil {
-		return fmt.Errorf("Invalid Recipient: %s", recipient)
+		return nil, fmt.Errorf("Invalid Recipient: %s", recipient)
 	}
 
 	gift := r.Recipients[recipient]
@@ -84,7 +85,46 @@ func (r *Rotation) GetEligibleGivers(recipient string) error {
 		eligibleMembers[member] = true
 	}
 
-	fmt.Printf("\n%+v\n", eligibleMembers)
+	return eligibleMembers, nil
+}
 
-	return nil
+type rotationOptions struct {
+	recipient string
+
+	options map[string]bool
+}
+
+// ByEligibleGiversCount implements sort interface for sorting by the number of potential givers
+type ByEligibleGiversCount []rotationOptions
+
+func (e ByEligibleGiversCount) Len() int           { return len(e) }
+func (e ByEligibleGiversCount) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
+func (e ByEligibleGiversCount) Less(i, j int) bool { return len(e[i].options) < len(e[j].options) }
+
+// GetNextYearsRotation chooses next years givers based on rules and previous years
+func (r *Rotation) GetNextYearsRotation(year string) {
+	var options = []rotationOptions{}
+	var result = map[string]string{}
+
+	for member := range r.Members {
+		optionList, _ := r.GetEligibleGivers(member)
+		options = append(options, rotationOptions{
+			recipient: member,
+			options:   optionList,
+		})
+	}
+
+	sort.Sort(ByEligibleGiversCount(options))
+
+	used := map[string]bool{}
+	for _, part := range options {
+		for option := range part.options {
+			if !used[option] {
+				used[option] = true
+				result[part.recipient] = option
+				break
+			}
+		}
+	}
+	fmt.Printf("%+v\n", result)
 }

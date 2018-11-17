@@ -129,12 +129,9 @@ func main() {
 			fmt.Println("")
 		}
 		if len(rotations) > 0 {
-			err := rotations[0].GetEligibleGivers("Pop")
-			if err != nil {
-				os.Exit(1)
-			}
+			rotations[0].GetNextYearsRotation("2019")
 
-			currentRotation.GetEligibleGivers("Ashlyn")
+			currentRotation.GetNextYearsRotation("2019")
 		}
 	}
 }
