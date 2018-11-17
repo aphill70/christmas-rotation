@@ -93,18 +93,6 @@ func main() {
 		log.Fatalf("Unable to retrieve data from sheet: %v", err)
 	}
 
-	f, err := os.Open("rules.json")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	rules := &gifts.Rules{}
-
-	json.NewDecoder(f).Decode(&rules)
-
-	fmt.Printf("%+v\n", rules)
-
 	var rotations []*gifts.Rotation
 	var currentRotation *gifts.Rotation
 	if len(resp.Values) == 0 {
@@ -118,7 +106,7 @@ func main() {
 				if currentRotation != nil {
 					rotations = append(rotations, currentRotation)
 				}
-				currentRotation, _ = gifts.NewRotation(rules)
+				currentRotation, _ = gifts.NewRotation("rules.json")
 			}
 
 			for column, cell := range row {

@@ -18,7 +18,12 @@ type (
 )
 
 // NewRotation creates a new GiftRotation object
-func NewRotation(rules *Rules) (*Rotation, error) {
+func NewRotation(rulesPath string) (*Rotation, error) {
+	rules, err := NewRules(rulesPath)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to load rules: %v", err)
+	}
+
 	return &Rotation{
 		Members:          make(map[string]bool),
 		Recipients:       make(map[string]*Gift),
@@ -72,7 +77,7 @@ func (r *Rotation) GetEligibleGivers(recipient string) error {
 	gift := r.Recipients[recipient]
 	var eligibleMembers = make(map[string]bool)
 	for member := range r.Members {
-		if member == recipient || gift.Givers[member] {
+		if member == recipient || gift.Givers[member] || !r.Rules.IsAllowed(recipient, member) {
 			continue
 		}
 
