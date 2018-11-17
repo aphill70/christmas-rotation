@@ -146,6 +146,26 @@ func TestGift_AddGiver(t *testing.T) {
 			args:    args{giver: "jill", year: "2002"},
 			wantErr: true,
 		},
+		{
+			name: "rollover",
+			fields: fields{
+				Recipient: "bob",
+				History:   map[string]string{"2002": "jane", "2003": "bill"},
+				Givers:    map[string]bool{"jane": true, "bill": true},
+			},
+			args:    args{giver: "bill", year: "2004"},
+			wantErr: false,
+		},
+		{
+			name: "rollover",
+			fields: fields{
+				Recipient: "bob",
+				History:   map[string]string{"2002": "jane", "2003": "bill"},
+				Givers:    map[string]bool{"jane": true, "bill": true},
+			},
+			args:    args{giver: "jane", year: "2004"},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

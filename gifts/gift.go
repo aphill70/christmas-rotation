@@ -33,9 +33,15 @@ func (g *Gift) AddGiver(giver, year string) error {
 	if g.History[year] != "" {
 		return fmt.Errorf("cannot duplicate years. giver for year %s already exists", year)
 	}
-
 	g.History[year] = normalizedGiver
-	g.Givers[normalizedGiver] = true
+
+	if g.Givers[normalizedGiver] {
+		g.Givers = map[string]bool{
+			normalizedGiver: true,
+		}
+	} else {
+		g.Givers[normalizedGiver] = true
+	}
 
 	return nil
 }
