@@ -85,6 +85,14 @@ func (r *Rotation) GetEligibleGivers(recipient string) (map[string]bool, error) 
 		eligibleMembers[member] = true
 	}
 
+	if len(eligibleMembers) == 0 {
+		for member := range r.Members {
+			if member != recipient {
+				eligibleMembers[member] = true
+			}
+		}
+	}
+
 	return eligibleMembers, nil
 }
 
@@ -104,7 +112,6 @@ func (e ByEligibleGiversCount) Less(i, j int) bool { return len(e[i].options) < 
 // GetNextYearsRotation chooses next years givers based on rules and previous years
 func (r *Rotation) GetNextYearsRotation(year string) {
 	var options = []rotationOptions{}
-	var result = map[string]string{}
 
 	for member := range r.Members {
 		optionList, _ := r.GetEligibleGivers(member)
@@ -121,10 +128,10 @@ func (r *Rotation) GetNextYearsRotation(year string) {
 		for option := range part.options {
 			if !used[option] {
 				used[option] = true
-				result[part.recipient] = option
+				r.RecipientToGiver[part.recipient] = option
 				break
 			}
 		}
 	}
-	fmt.Printf("%+v\n", result)
+	fmt.Printf("%+v\n", r.RecipientToGiver)
 }

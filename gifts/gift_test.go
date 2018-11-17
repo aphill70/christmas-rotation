@@ -147,7 +147,7 @@ func TestGift_AddGiver(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "rollover",
+			name: "rollover/bill",
 			fields: fields{
 				Recipient: "bob",
 				History:   map[string]string{"2002": "jane", "2003": "bill"},
@@ -157,7 +157,7 @@ func TestGift_AddGiver(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "rollover",
+			name: "rollover/jane",
 			fields: fields{
 				Recipient: "bob",
 				History:   map[string]string{"2002": "jane", "2003": "bill"},
