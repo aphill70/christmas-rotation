@@ -87,7 +87,7 @@ func (r *Rotation) GetEligibleGivers(recipient string) (map[string]bool, error) 
 
 	if len(eligibleMembers) == 0 {
 		for member := range r.Members {
-			if member != recipient {
+			if member != recipient && r.Rules.IsAllowed(recipient, member) {
 				eligibleMembers[member] = true
 			}
 		}
