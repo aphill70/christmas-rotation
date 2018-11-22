@@ -24,6 +24,9 @@ type (
 		sheetID   string
 
 		verbose bool
+
+		columnMap map[int]string
+		rowMap    map[int]string
 	}
 )
 
@@ -52,6 +55,9 @@ func NewSheet(id string) (*Sheet, error) {
 		sheetID:   id,
 
 		verbose: true,
+
+		columnMap: make(map[int]string),
+		rowMap:    make(map[int]string),
 	}
 
 	// create sheets client
@@ -71,32 +77,36 @@ func (s *Sheet) GetRotations() ([]*gifts.Rotation, error) {
 		return nil, fmt.Errorf("Failed to find any data in the sheet")
 	}
 
-	columnMap := make(map[int]string)
-
 	for rowIndex, row := range resp.Values {
 		if len(row) == 0 || rowIndex == 0 {
-			fmt.Println("found empty row initializing new rotation")
+			if s.verbose {
+				fmt.Println("")
+				fmt.Println("found empty row initializing new rotation")
+			}
+
 			if currentRotation != nil {
 				rotations = append(rotations, currentRotation)
 			}
+
 			currentRotation, _ = gifts.NewRotation("rules.json")
 		}
 
 		for column, cell := range row {
 			if rowIndex == 0 {
-				columnMap[column] = fmt.Sprintf("%s", cell)
+				s.columnMap[column] = fmt.Sprintf("%s", cell)
 			} else {
-				if columnMap[column] == "Name" {
+				if s.columnMap[column] == "Name" {
 					currentRotation.AddRecipient(fmt.Sprintf("%s", cell))
+					s.rowMap[rowIndex] = fmt.Sprintf("%s", cell)
 				} else {
 					giver := fmt.Sprintf("%s", cell)
 					if !strings.Contains(giver, "X") {
-						currentRotation.AddGiver(giver, columnMap[column])
+						currentRotation.AddGiver(giver, s.columnMap[column])
 					}
 				}
 
 				if s.verbose {
-					fmt.Printf(" %s:%s ", columnMap[column], cell)
+					fmt.Printf("%s:%s ", s.columnMap[column], cell)
 				}
 			}
 		}
@@ -112,6 +122,30 @@ func (s *Sheet) GetRotations() ([]*gifts.Rotation, error) {
 
 // WriteNewAssignments inserts a new column or overwrites an existing one with passed in assignments <Recipient>:<Gifter>
 func (s *Sheet) WriteNewAssignments(year string, assignments map[string]string) {
+	ctx := context.Background()
+	// How the input data should be interpreted.
+	valueInputOption := "RAW"
+
+	// The new values to apply to the spreadsheet.
+	data := []*sheets.ValueRange{
+		{
+			MajorDimension: "COLUMN",
+			Range:          "",
+			// Values:         [][]interface {},
+		},
+	}
+
+	rb := &sheets.BatchUpdateValuesRequest{
+		ValueInputOption: valueInputOption,
+		Data:             data,
+	}
+
+	resp, err := s.client.Spreadsheets.Values.BatchUpdate(s.sheetID, rb).Context(ctx).Do()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%+v", resp)
 
 }
 
