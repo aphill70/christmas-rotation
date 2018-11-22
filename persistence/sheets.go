@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strings"
@@ -147,6 +148,28 @@ func (s *Sheet) WriteNewAssignments(year string, assignments map[string]string) 
 
 	fmt.Printf("%+v", resp)
 
+}
+
+func columnToLetter(column int) string {
+	var temp int
+	var letter string
+	for column > 0 {
+		temp = (column - 1) % 26
+		letter = fmt.Sprintf("%s%s", string(temp+65), letter)
+		column = (column - temp - 1) / 26
+	}
+	return string(letter)
+}
+
+func letterToColumn(letter string) int {
+	letters := []rune(letter)
+	var column float64
+	var length = float64(len(letter))
+	var i float64
+	for ; i < length; i++ {
+		column += float64(letters[int(i)]-64) * math.Pow(26, length-i-1)
+	}
+	return int(column)
 }
 
 // Retrieve a token, saves the token, then returns the generated client.
