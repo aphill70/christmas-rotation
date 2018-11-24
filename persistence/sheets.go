@@ -28,6 +28,8 @@ type (
 
 		columnMap map[int]string
 		rowMap    map[int]string
+
+		lastRow int
 	}
 )
 
@@ -114,9 +116,18 @@ func (s *Sheet) GetRotations() ([]*gifts.Rotation, error) {
 		if s.verbose {
 			fmt.Println("")
 		}
+		s.lastRow = rowIndex
 	}
 
 	rotations = append(rotations, currentRotation)
+
+	for key, value := range s.columnMap {
+		if value == "2019" {
+			fmt.Printf("!!! %s !!!\n", columnToLetter(key+1))
+		}
+	}
+
+	fmt.Printf("@@@ %d @@@\n", s.lastRow+1)
 
 	return rotations, nil
 }
@@ -131,8 +142,8 @@ func (s *Sheet) WriteNewAssignments(year string, assignments map[string]string) 
 	data := []*sheets.ValueRange{
 		{
 			MajorDimension: "COLUMN",
-			Range:          "",
-			// Values:         [][]interface {},
+			Range:          s.getColumnToWrite(year),
+			Values:         s.formatDataToWrite(assignments),
 		},
 	}
 
@@ -148,6 +159,39 @@ func (s *Sheet) WriteNewAssignments(year string, assignments map[string]string) 
 
 	fmt.Printf("%+v", resp)
 
+}
+
+func (s *Sheet) formatDataToWrite(assignments map[string]string) [][]interface{} {
+	var anything [][]interface{}
+
+	var stringList []interface{}
+
+	for i := 0; i < s.lastRow+1; i++ {
+		if s.rowMap[i] == "" {
+			stringList = append(stringList, "")
+			continue
+		}
+		receipt := s.rowMap[i]
+
+		stringList = append(stringList, assignments[receipt])
+	}
+	return append(anything, stringList)
+
+}
+
+func (s *Sheet) getColumnToWrite(year string) string {
+	var column string
+	for index, yearColumn := range s.columnMap {
+		if year == yearColumn {
+			column = columnToLetter(index + 1)
+		}
+	}
+
+	if column == "" {
+		column = columnToLetter(len(s.columnMap) + 1)
+	}
+
+	return fmt.Sprintf("%s%d:%s%d", column, 1, column, s.lastRow+1)
 }
 
 func columnToLetter(column int) string {
