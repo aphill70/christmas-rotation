@@ -2,7 +2,8 @@ package gifts
 
 import "strings"
 
-func normalizeName(name string) string {
+// NormalizeName handles typos and toLowers
+func NormalizeName(name string) string {
 	normalized := strings.Trim(strings.ToLower(name), " ")
 
 	if strings.HasPrefix(normalized, "chris") {

@@ -21,7 +21,7 @@ func NewGift(recipient string) (*Gift, error) {
 	}
 
 	return &Gift{
-		Recipient: normalizeName(recipient),
+		Recipient: NormalizeName(recipient),
 		History:   make(map[string]string),
 		Givers:    make(map[string]bool),
 	}, nil
@@ -29,7 +29,7 @@ func NewGift(recipient string) (*Gift, error) {
 
 // AddGiver adds a new giver to the Gift
 func (g *Gift) AddGiver(giver, year string) error {
-	normalizedGiver := normalizeName(giver)
+	normalizedGiver := NormalizeName(giver)
 	if g.History[year] != "" {
 		return fmt.Errorf("cannot duplicate years. giver for year %s already exists", year)
 	}
