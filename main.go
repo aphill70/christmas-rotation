@@ -13,11 +13,11 @@ func main() {
 
 	fmt.Println(len(rotations))
 	if len(rotations) > 0 {
-		rotations[0].GetNextYearsRotation("2019")
+		rotations[0].GetNextYearsRotation("2020")
 
-		rotations[1].GetNextYearsRotation("2019")
+		rotations[1].GetNextYearsRotation("2020")
 
-		sheet.WriteNewAssignments("2019", rotations)
+		sheet.WriteNewAssignments("2020", rotations)
 	}
 
 }
