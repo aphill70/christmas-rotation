@@ -241,7 +241,7 @@ func TestRotation_GetEligibleGivers(t *testing.T) {
 					"jane": &Gift{
 						Recipient: "",
 						History: map[string]string{
-							"2002": "jane",
+							"2002": "jen",
 							"2003": "bill",
 						},
 						Givers: map[string]bool{
