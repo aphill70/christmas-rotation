@@ -3,7 +3,6 @@ package gifts
 import (
 	"reflect"
 	"testing"
-	"fmt"
 )
 
 func TestRotation_AddGiver(t *testing.T) {
