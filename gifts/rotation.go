@@ -12,6 +12,8 @@ type (
 		Recipients       map[string]*Gift
 		Members          map[string]bool
 
+		LastRow int
+
 		Rules *Rules
 
 		currentRecipient *Gift
@@ -36,7 +38,7 @@ func NewRotation(rulesPath string) (*Rotation, error) {
 
 // AddRecipient Adds a new person to the rotation
 func (r *Rotation) AddRecipient(recipient string) error {
-	recipient = normalizeName(recipient)
+	recipient = NormalizeName(recipient)
 	gift, err := NewGift(recipient)
 	if err != nil {
 		return fmt.Errorf("Invalid recipient: %s", recipient)
@@ -54,7 +56,7 @@ func (r *Rotation) AddRecipient(recipient string) error {
 
 // AddGiver adds a new giver to the current recipient
 func (r *Rotation) AddGiver(giver, year string) error {
-	giver = normalizeName(giver)
+	giver = NormalizeName(giver)
 	if r.currentRecipient == nil {
 		return fmt.Errorf("current recipient is null")
 	}
@@ -70,7 +72,7 @@ func (r *Rotation) AddGiver(giver, year string) error {
 
 // GetEligibleGivers returns all valid givers for a given recipient
 func (r *Rotation) GetEligibleGivers(recipient string) (map[string]bool, error) {
-	recipient = normalizeName(recipient)
+	recipient = NormalizeName(recipient)
 	if !r.Members[recipient] || r.Recipients[recipient] == nil {
 		return nil, fmt.Errorf("Invalid Recipient: %s", recipient)
 	}
@@ -133,5 +135,4 @@ func (r *Rotation) GetNextYearsRotation(year string) {
 			}
 		}
 	}
-	fmt.Printf("%+v\n", r.RecipientToGiver)
 }

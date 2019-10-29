@@ -116,67 +116,75 @@ func (s *Sheet) GetRotations() ([]*gifts.Rotation, error) {
 		if s.verbose {
 			fmt.Println("")
 		}
+		currentRotation.LastRow = rowIndex
 		s.lastRow = rowIndex
 	}
 
 	rotations = append(rotations, currentRotation)
 
-	for key, value := range s.columnMap {
-		if value == "2019" {
-			fmt.Printf("!!! %s !!!\n", columnToLetter(key+1))
-		}
-	}
-
-	fmt.Printf("@@@ %d @@@\n", s.lastRow+1)
-
 	return rotations, nil
 }
 
 // WriteNewAssignments inserts a new column or overwrites an existing one with passed in assignments <Recipient>:<Gifter>
-func (s *Sheet) WriteNewAssignments(year string, assignments map[string]string) {
-	ctx := context.Background()
-	// How the input data should be interpreted.
-	valueInputOption := "RAW"
+func (s *Sheet) WriteNewAssignments(year string, rotations []*gifts.Rotation) {
+	// ctx := context.Background()
+	// // How the input data should be interpreted.
+	// valueInputOption := "RAW"
 
 	// The new values to apply to the spreadsheet.
 	data := []*sheets.ValueRange{
 		{
 			MajorDimension: "COLUMN",
 			Range:          s.getColumnToWrite(year),
-			Values:         s.formatDataToWrite(assignments),
+			Values:         s.formatDataToWrite(rotations),
 		},
 	}
+	fmt.Printf("%+v\n", data[0].Range)
+	fmt.Printf("%+v\n", data[0].Values)
 
-	rb := &sheets.BatchUpdateValuesRequest{
-		ValueInputOption: valueInputOption,
-		Data:             data,
-	}
+	// rb := &sheets.BatchUpdateValuesRequest{
+	// 	ValueInputOption: valueInputOption,
+	// 	Data:             data,
+	// }
 
-	resp, err := s.client.Spreadsheets.Values.BatchUpdate(s.sheetID, rb).Context(ctx).Do()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// resp, err := s.client.Spreadsheets.Values.BatchUpdate(s.sheetID, rb).Context(ctx).Do()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	fmt.Printf("%+v", resp)
+	// fmt.Printf("%+v", resp)
 
 }
 
-func (s *Sheet) formatDataToWrite(assignments map[string]string) [][]interface{} {
+func (s *Sheet) formatDataToWrite(rotations []*gifts.Rotation) [][]interface{} {
 	var anything [][]interface{}
 
 	var stringList []interface{}
 
+	currentRotation := 0
+	assignments := rotations[currentRotation].RecipientToGiver
 	for i := 0; i < s.lastRow+1; i++ {
+		currentRowNormalized := gifts.NormalizeName(s.rowMap[i])
+		if assignments[currentRowNormalized] == "" && i > 0 {
+			currentRotation++
+
+			fmt.Println(currentRotation)
+			if len(rotations) > currentRotation {
+				assignments = rotations[currentRotation].RecipientToGiver
+			} else {
+				break
+			}
+		}
+
 		if s.rowMap[i] == "" {
-			stringList = append(stringList, "")
+			stringList = append(stringList, "-")
 			continue
 		}
-		receipt := s.rowMap[i]
 
-		stringList = append(stringList, assignments[receipt])
+		stringList = append(stringList, assignments[currentRowNormalized])
 	}
-	return append(anything, stringList)
 
+	return append(anything, stringList)
 }
 
 func (s *Sheet) getColumnToWrite(year string) string {
