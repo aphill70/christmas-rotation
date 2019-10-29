@@ -3,6 +3,7 @@ package gifts
 import (
 	"reflect"
 	"testing"
+	"fmt"
 )
 
 func TestRotation_AddGiver(t *testing.T) {
@@ -93,41 +94,7 @@ func TestRotation_GetEligibleGivers(t *testing.T) {
 			fields: fields{
 				RecipientToGiver: map[string]string{},
 				Recipients: map[string]*Gift{
-					"jill": &Gift{
-						Recipient: "",
-						History: map[string]string{
-							"2002": "bill",
-							"2003": "jane",
-						},
-						Givers: map[string]bool{
-							"bill": true,
-							"jane": true,
-						},
-					},
-					"bill": &Gift{
-						Recipient: "",
-						History: map[string]string{
-							"2002": "jeff",
-							"2003": "jen",
-						},
-						Givers: map[string]bool{
-							"jen":  true,
-							"jeff": true,
-						},
-					},
-					"jen": &Gift{
-						Recipient: "",
-						History: map[string]string{
-							"2002": "jill",
-							"2003": "jeff",
-						},
-						Givers: map[string]bool{
-							"jill": true,
-							"jeff": true,
-						},
-					},
 					"jeff": &Gift{
-						Recipient: "",
 						History: map[string]string{
 							"2002": "jen",
 							"2003": "jill",
@@ -144,8 +111,6 @@ func TestRotation_GetEligibleGivers(t *testing.T) {
 					"jill": true,
 					"bill": true,
 				},
-				Rules:            &Rules{},
-				currentRecipient: &Gift{},
 			},
 			args: args{
 				recipient: "jeff",
@@ -160,19 +125,7 @@ func TestRotation_GetEligibleGivers(t *testing.T) {
 			fields: fields{
 				RecipientToGiver: map[string]string{},
 				Recipients: map[string]*Gift{
-					"bill": &Gift{
-						Recipient: "",
-						History: map[string]string{
-							"2002": "jane",
-							"2003": "jen",
-						},
-						Givers: map[string]bool{
-							"jane": true,
-							"jen":  true,
-						},
-					},
 					"jen": &Gift{
-						Recipient: "",
 						History: map[string]string{
 							"2002": "bill",
 							"2003": "jane",
@@ -182,25 +135,12 @@ func TestRotation_GetEligibleGivers(t *testing.T) {
 							"jane": true,
 						},
 					},
-					"jane": &Gift{
-						Recipient: "",
-						History: map[string]string{
-							"2002": "jane",
-							"2003": "bill",
-						},
-						Givers: map[string]bool{
-							"jane": true,
-							"bill": true,
-						},
-					},
 				},
 				Members: map[string]bool{
 					"jane": true,
 					"jen":  true,
 					"bill": true,
 				},
-				Rules:            &Rules{},
-				currentRecipient: &Gift{},
 			},
 			args: args{
 				recipient: "jen",
@@ -227,42 +167,85 @@ func TestRotation_GetEligibleGivers(t *testing.T) {
 							"jen": true,
 						},
 					},
-					"jen": &Gift{
-						Recipient: "",
-						History: map[string]string{
-							"2002": "bill",
-							"2003": "jane",
-						},
-						Givers: map[string]bool{
-							"bill": true,
-							"jane": true,
-						},
-					},
-					"jane": &Gift{
-						Recipient: "",
-						History: map[string]string{
-							"2002": "jen",
-							"2003": "bill",
-						},
-						Givers: map[string]bool{
-							"jane": true,
-							"bill": true,
-						},
-					},
 				},
 				Members: map[string]bool{
 					"jane": true,
 					"jen":  true,
 					"bill": true,
 				},
-				Rules:            &Rules{},
-				currentRecipient: &Gift{},
 			},
 			args: args{
 				recipient: "bill",
 			},
 			want: map[string]bool{
 				"jane": true,
+			},
+			wantErr: false,
+		},
+		{
+			name: "uneven/options",
+			fields: fields{
+				RecipientToGiver: map[string]string{},
+				Recipients: map[string]*Gift{
+					"jen": &Gift{
+						History: map[string]string{
+							"2003": "jeff",
+						},
+						Givers: map[string]bool{
+							"jeff": true,
+						},
+					},
+				},
+				Members: map[string]bool{
+					"jeff": true,
+					"jen":  true,
+					"jill": true,
+					"bill": true,
+				},
+			},
+			args: args{
+				recipient: "jen",
+			},
+			want: map[string]bool{
+				"bill": true,
+				"jill": true,
+			},
+			wantErr: false,
+		},
+		{
+			name: "uneven/rollover",
+			fields: fields{
+				RecipientToGiver: map[string]string{},
+				Recipients: map[string]*Gift{
+					"jeff": &Gift{
+						History: map[string]string{
+							"2001": "bill",
+							"2002": "jen",
+							"2003": "jill",
+						},
+						Givers: map[string]bool{
+							"bill": true,
+							"jen":  true,
+							"jill": true,
+						},
+					},
+				},
+				Members: map[string]bool{
+					"jeff": true,
+					"jen":  true,
+					"jill": true,
+					"bill": true,
+				},
+				Rules:            &Rules{},
+				currentRecipient: &Gift{},
+			},
+			args: args{
+				recipient: "jeff",
+			},
+			want: map[string]bool{
+				"bill": true,
+				"jen": true,
+				"jill": true,
 			},
 			wantErr: false,
 		},
@@ -277,6 +260,7 @@ func TestRotation_GetEligibleGivers(t *testing.T) {
 				currentRecipient: tt.fields.currentRecipient,
 			}
 			got, err := r.GetEligibleGivers(tt.args.recipient)
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Rotation.GetEligibleGivers() error = %v, wantErr %v", err, tt.wantErr)
 				return

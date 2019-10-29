@@ -48,7 +48,7 @@ func NewRules(path string) (*Rules, error) {
 
 // IsAllowed returns true if the rules do not forbit them from recieving a gift from the gifter
 func (r *Rules) IsAllowed(recipient, gifter string) bool {
-	if r.PersonLookup[recipient] == nil {
+	if r == nil || r.PersonLookup == nil || r.PersonLookup[recipient] == nil {
 		return true
 	}
 	return !r.PersonLookup[recipient][gifter]
