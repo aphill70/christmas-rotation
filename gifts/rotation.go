@@ -63,6 +63,7 @@ func (r *Rotation) AddGiver(giver, year string) error {
 
 	r.currentRecipient.AddGiver(giver, year)
 
+	// could this be an int to handle rollover especially uneven rollover when we need to rollover and still remember?
 	if !r.Members[giver] {
 		r.Members[giver] = true
 	}
