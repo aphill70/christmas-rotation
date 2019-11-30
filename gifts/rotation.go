@@ -2,7 +2,6 @@ package gifts
 
 import (
 	"fmt"
-	"sort"
 )
 
 type (
@@ -19,6 +18,8 @@ type (
 		currentRecipient *Gift
 	}
 )
+
+// Recipient -> [Giver : Count]
 
 // NewRotation creates a new GiftRotation object
 func NewRotation(rulesPath string) (*Rotation, error) {
@@ -72,29 +73,21 @@ func (r *Rotation) AddGiver(giver, year string) error {
 }
 
 // GetEligibleGivers returns all valid givers for a given recipient
-func (r *Rotation) GetEligibleGivers(recipient string) (map[string]bool, error) {
-	recipient = NormalizeName(recipient)
-	if !r.Members[recipient] || r.Recipients[recipient] == nil {
-		return nil, fmt.Errorf("Invalid Recipient: %s", recipient)
-	}
+func (r *Rotation) GetEligibleGivers(recipient string) (map[string]int, error) {
+	// recipient = NormalizeName(recipient)
+	// if !r.Members[recipient] || r.Recipients[recipient] == nil {
+	// 	return nil, fmt.Errorf("Invalid Recipient: %s", recipient)
+	// }
 
-	gift := r.Recipients[recipient]
-	var eligibleMembers = make(map[string]bool)
-	for member := range r.Members {
-		if member == recipient || gift.Givers[member] || !r.Rules.IsAllowed(recipient, member) {
-			continue
-		}
+	// gift := r.Recipients[recipient]
+	var eligibleMembers = make(map[string]int)
+	// for member := range r.Members {
+	// 	if member == recipient || !r.Rules.IsAllowed(recipient, member) {
+	// 		continue
+	// 	}
 
-		eligibleMembers[member] = true
-	}
-
-	if len(eligibleMembers) == 0 {
-		for member := range r.Members {
-			if member != recipient && r.Rules.IsAllowed(recipient, member) {
-				eligibleMembers[member] = true
-			}
-		}
-	}
+	// 	eligibleMembers[member] = gift.Givers[member]
+	// }
 
 	return eligibleMembers, nil
 }
@@ -102,7 +95,7 @@ func (r *Rotation) GetEligibleGivers(recipient string) (map[string]bool, error) 
 type rotationOptions struct {
 	recipient string
 
-	options map[string]bool
+	options map[int][]string
 }
 
 // ByEligibleGiversCount implements sort interface for sorting by the number of potential givers
@@ -114,26 +107,28 @@ func (e ByEligibleGiversCount) Less(i, j int) bool { return len(e[i].options) < 
 
 // GetNextYearsRotation chooses next years givers based on rules and previous years
 func (r *Rotation) GetNextYearsRotation(year string) {
-	var options = []rotationOptions{}
+	// Givers sorted by rotation index
+	// Then members sorted by givers in current rotation index
+	// var options = []rotationOptions{}
 
-	for member := range r.Members {
-		optionList, _ := r.GetEligibleGivers(member)
-		options = append(options, rotationOptions{
-			recipient: member,
-			options:   optionList,
-		})
-	}
+	// for member := range r.Members {
+	// 	optionList, _ := r.GetEligibleGivers(member)
+	// 	options = append(options, rotationOptions{
+	// 		recipient: member,
+	// 		options:   optionList,
+	// 	})
+	// }
 
-	sort.Sort(ByEligibleGiversCount(options))
+	// sort.Sort(ByEligibleGiversCount(options))
 
-	used := map[string]bool{}
-	for _, part := range options {
-		for option := range part.options {
-			if !used[option] {
-				used[option] = true
-				r.RecipientToGiver[part.recipient] = option
-				break
-			}
-		}
-	}
+	// used := map[string]bool{}
+	// for _, part := range options {
+	// 	for option := range part.options {
+	// 		if !used[option] {
+	// 			used[option] = true
+	// 			r.RecipientToGiver[part.recipient] = option
+	// 			break
+	// 		}
+	// 	}
+	// }
 }

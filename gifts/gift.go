@@ -9,8 +9,15 @@ type (
 	Gift struct {
 		Recipient string
 
-		History map[string]string
-		Givers  map[string]bool
+		History     map[string]*Giver
+		Givers      []*Giver
+		GiverLookup map[string]*Giver
+	}
+
+	// Giver struct for representing a giver and the number of times they have given
+	Giver struct {
+		Count int
+		Giver string
 	}
 )
 
@@ -21,27 +28,48 @@ func NewGift(recipient string) (*Gift, error) {
 	}
 
 	return &Gift{
-		Recipient: NormalizeName(recipient),
-		History:   make(map[string]string),
-		Givers:    make(map[string]bool),
+		Recipient:   NormalizeName(recipient),
+		History:     make(map[string]*Giver),
+		Givers:      []*Giver{},
+		GiverLookup: make(map[string]*Giver),
 	}, nil
 }
 
 // AddGiver adds a new giver to the Gift
 func (g *Gift) AddGiver(giver, year string) error {
 	normalizedGiver := NormalizeName(giver)
-	if g.History[year] != "" {
+	if g.History[year] != nil {
 		return fmt.Errorf("cannot duplicate years. giver for year %s already exists", year)
 	}
-	g.History[year] = normalizedGiver
 
-	if g.Givers[normalizedGiver] {
-		g.Givers = map[string]bool{
-			normalizedGiver: true,
+	giverStruct := g.GiverLookup[normalizedGiver]
+	if giverStruct == nil {
+		giverStruct = &Giver{
+			Count: 1,
+			Giver: normalizedGiver,
 		}
+		g.GiverLookup[normalizedGiver] = giverStruct
+		g.Givers = append(g.Givers, giverStruct)
 	} else {
-		g.Givers[normalizedGiver] = true
+		giverStruct.Count++
 	}
 
+	g.History[year] = giverStruct
+
 	return nil
+}
+
+// GetCurrentRotationIndex d
+func (g *Gift) GetCurrentRotationIndex() int {
+	currentRotationIndex := 0
+	init := false
+	for _, val := range g.GiverLookup {
+		if !init {
+			currentRotationIndex = val.Count
+			init = true
+		} else if val.Count < currentRotationIndex {
+			currentRotationIndex = val.Count
+		}
+	}
+	return currentRotationIndex
 }
