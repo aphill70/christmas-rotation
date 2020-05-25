@@ -41,7 +41,7 @@ func NewSheet(id string) (*Sheet, error) {
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
-	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
+	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets")
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
@@ -134,7 +134,7 @@ func (s *Sheet) WriteNewAssignments(year string, rotations []*gifts.Rotation) {
 	// The new values to apply to the spreadsheet.
 	data := []*sheets.ValueRange{
 		{
-			MajorDimension: "COLUMN",
+			MajorDimension: "COLUMNS",
 			Range:          s.getColumnToWrite(year),
 			Values:         s.formatDataToWrite(rotations),
 		},
@@ -168,7 +168,6 @@ func (s *Sheet) formatDataToWrite(rotations []*gifts.Rotation) [][]interface{} {
 		if assignments[currentRowNormalized] == "" && i > 0 {
 			currentRotation++
 
-			fmt.Println(currentRotation)
 			if len(rotations) > currentRotation {
 				assignments = rotations[currentRotation].RecipientToGiver
 			} else {

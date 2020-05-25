@@ -21,6 +21,17 @@ type (
 	}
 )
 
+// GetGiver returns the giver info entry
+func (g *Gift) GetGiver(giver string) *Giver {
+	for _, entry := range g.Givers {
+		if giver == entry.Giver {
+			return entry
+		}
+	}
+
+	return nil
+}
+
 // NewGift creates a new Gift to calculate
 func NewGift(recipient string) (*Gift, error) {
 	if recipient == "" {

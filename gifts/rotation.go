@@ -2,6 +2,7 @@ package gifts
 
 import (
 	"fmt"
+	"sort"
 )
 
 type (
@@ -74,26 +75,35 @@ func (r *Rotation) AddGiver(giver, year string) error {
 
 // GetEligibleGivers returns all valid givers for a given recipient
 func (r *Rotation) GetEligibleGivers(recipient string) (map[string]int, error) {
-	// recipient = NormalizeName(recipient)
-	// if !r.Members[recipient] || r.Recipients[recipient] == nil {
-	// 	return nil, fmt.Errorf("Invalid Recipient: %s", recipient)
-	// }
+	fmt.Println("TEST: ", recipient)
+	recipient = NormalizeName(recipient)
+	if !r.Members[recipient] || r.Recipients[recipient] == nil {
+		return nil, fmt.Errorf("Invalid Recipient: %s", recipient)
+	}
 
-	// gift := r.Recipients[recipient]
+	gift := r.Recipients[recipient]
 	var eligibleMembers = make(map[string]int)
-	// for member := range r.Members {
-	// 	if member == recipient || !r.Rules.IsAllowed(recipient, member) {
-	// 		continue
-	// 	}
+	for member := range r.Members {
+		// fmt.Printf("%v == %v\n", member, recipient)
+		if member == recipient || !r.Rules.IsAllowed(recipient, member) {
+			continue
+		}
 
-	// 	eligibleMembers[member] = gift.Givers[member]
-	// }
-
+		giver := gift.GetGiver(member)
+		if giver == nil {
+			fmt.Println("New Giver: ", member)
+			eligibleMembers[member] = 0
+		} else {
+			eligibleMembers[member] = giver.Count
+		}
+	}
 	return eligibleMembers, nil
 }
 
 type rotationOptions struct {
-	recipient string
+	recipient   string
+	lowestIndex int
+	indexes     []int
 
 	options map[int][]string
 }
@@ -101,34 +111,81 @@ type rotationOptions struct {
 // ByEligibleGiversCount implements sort interface for sorting by the number of potential givers
 type ByEligibleGiversCount []rotationOptions
 
-func (e ByEligibleGiversCount) Len() int           { return len(e) }
-func (e ByEligibleGiversCount) Swap(i, j int)      { e[i], e[j] = e[j], e[i] }
-func (e ByEligibleGiversCount) Less(i, j int) bool { return len(e[i].options) < len(e[j].options) }
+func (e ByEligibleGiversCount) Len() int      { return len(e) }
+func (e ByEligibleGiversCount) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
+func (e ByEligibleGiversCount) Less(i, j int) bool {
+	lowestI := getLowestOptionIndex(e, i)
+	lowestJ := getLowestOptionIndex(e, j)
+
+	if lowestI != lowestJ {
+		return lowestI < lowestJ
+	}
+
+	return len(e[i].options[lowestI]) < len(e[j].options[lowestJ])
+}
+
+func getLowestOptionIndex(e []rotationOptions, i int) int {
+	lowestI := -1
+	for iKey := range e[i].options {
+		if lowestI == -1 || iKey < lowestI {
+			lowestI = iKey
+		}
+	}
+
+	return lowestI
+}
 
 // GetNextYearsRotation chooses next years givers based on rules and previous years
 func (r *Rotation) GetNextYearsRotation(year string) {
 	// Givers sorted by rotation index
 	// Then members sorted by givers in current rotation index
-	// var options = []rotationOptions{}
+	var options = []rotationOptions{}
 
-	// for member := range r.Members {
-	// 	optionList, _ := r.GetEligibleGivers(member)
-	// 	options = append(options, rotationOptions{
-	// 		recipient: member,
-	// 		options:   optionList,
-	// 	})
-	// }
+	for member := range r.Members {
+		optionList, _ := r.GetEligibleGivers(member)
+		sortedOptions := map[int][]string{}
+		lowestIndex := -1
+		indexes := []int{}
+		for option, count := range optionList {
+			if sortedOptions[count] == nil {
+				if lowestIndex == -1 || count < lowestIndex {
+					lowestIndex = count
+				}
+				indexes = append(indexes, count)
+				sortedOptions[count] = []string{}
+			}
 
-	// sort.Sort(ByEligibleGiversCount(options))
+			sortedOptions[count] = append(sortedOptions[count], option)
+		}
 
-	// used := map[string]bool{}
-	// for _, part := range options {
-	// 	for option := range part.options {
-	// 		if !used[option] {
-	// 			used[option] = true
-	// 			r.RecipientToGiver[part.recipient] = option
-	// 			break
-	// 		}
-	// 	}
-	// }
+		sort.Ints(indexes)
+		options = append(options, rotationOptions{
+			recipient:   member,
+			lowestIndex: lowestIndex,
+			indexes:     indexes,
+			options:     sortedOptions,
+		})
+	}
+
+	sort.Sort(ByEligibleGiversCount(options))
+
+	fmt.Println("RESULTS: ", options)
+
+	used := map[string]bool{}
+	for _, part := range options {
+		found := false
+		for currentIndex := range part.indexes {
+			for _, option := range part.options[currentIndex] {
+				if !used[option] {
+					used[option] = true
+					r.RecipientToGiver[part.recipient] = option
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
 }
