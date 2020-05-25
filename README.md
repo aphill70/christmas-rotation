@@ -1,6 +1,6 @@
 # christmas-rotation
 
-[![Build Status](https://travis-ci.com/aphill70/christmas-rotation.svg?branch=master)](https://travis-ci.com/aphill70/christmas-rotation)
+![Go](https://github.com/aphill70/christmas-rotation/workflows/Go/badge.svg)
 
 Simple app written to store and generate a christmas present rotation using Google Sheets.
 
