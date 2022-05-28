@@ -22,90 +22,90 @@ func TestNewRules(t *testing.T) {
 			},
 			want: &Rules{
 				Households: [][]string{
-					[]string{"donna", "michael", "austin"},
-					[]string{"megan", "christopher", "aiden", "ashlyn", "kenzie"},
-					[]string{"heidi", "spencer", "charlie", "sadie"},
-					[]string{"pop", "gigi"},
-					[]string{"adam", "kaitie", "seeley"},
+					{"donna", "michael", "austin"},
+					{"megan", "christopher", "aiden", "ashlyn", "kenzie"},
+					{"heidi", "spencer", "charlie", "sadie"},
+					{"pop", "gigi"},
+					{"adam", "kaitie", "seeley"},
 				},
 				PersonLookup: map[string]map[string]bool{
-					"donna": map[string]bool{
+					"donna": {
 						"michael": true,
 						"austin":  true,
 					},
-					"michael": map[string]bool{
+					"michael": {
 						"austin": true,
 						"donna":  true,
 					},
-					"austin": map[string]bool{
+					"austin": {
 						"michael": true,
 						"donna":   true,
 					},
-					"megan": map[string]bool{
+					"megan": {
 						"christopher": true,
 						"aiden":       true,
 						"ashlyn":      true,
 						"kenzie":      true,
 					},
-					"christopher": map[string]bool{
+					"christopher": {
 						"megan":  true,
 						"aiden":  true,
 						"ashlyn": true,
 						"kenzie": true,
 					},
-					"aiden": map[string]bool{
+					"aiden": {
 						"megan":       true,
 						"christopher": true,
 						"ashlyn":      true,
 						"kenzie":      true,
 					},
-					"ashlyn": map[string]bool{
+					"ashlyn": {
 						"megan":       true,
 						"christopher": true,
 						"aiden":       true,
 						"kenzie":      true,
 					},
-					"kenzie": map[string]bool{
+					"kenzie": {
 						"megan":       true,
 						"christopher": true,
 						"aiden":       true,
 						"ashlyn":      true,
 					},
-					"heidi": map[string]bool{
+					"heidi": {
 						"spencer": true,
 						"charlie": true,
 						"sadie":   true,
 					},
-					"spencer": map[string]bool{
+					"spencer": {
 						"heidi":   true,
 						"charlie": true,
 						"sadie":   true,
 					},
-					"charlie": map[string]bool{
+					"charlie": {
 						"heidi":   true,
 						"spencer": true,
 						"sadie":   true,
 					},
-					"sadie": map[string]bool{
+					"sadie": {
 						"heidi":   true,
 						"spencer": true,
 						"charlie": true,
 					},
-					"pop": map[string]bool{
+					"pop": {
 						"gigi": true,
 					},
-					"gigi": map[string]bool{
+					"gigi": {
 						"pop": true,
 					},
-					"adam": map[string]bool{
+					"adam": {
 						"kaitie": true,
 						"seeley": true,
 					},
-					"kaitie": map[string]bool{
+					"kaitie": {
 						"adam":   true,
 						"seeley": true,
 					},
-					"seeley": map[string]bool{
+					"seeley": {
 						"adam":   true,
 						"kaitie": true,
 					},

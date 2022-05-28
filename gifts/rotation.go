@@ -26,7 +26,7 @@ type (
 func NewRotation(rulesPath string) (*Rotation, error) {
 	rules, err := NewRules(rulesPath)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to load rules: %v", err)
+		return nil, fmt.Errorf("failed to load rules: %v", err)
 	}
 
 	return &Rotation{
@@ -43,7 +43,7 @@ func (r *Rotation) AddRecipient(recipient string) error {
 	recipient = NormalizeName(recipient)
 	gift, err := NewGift(recipient)
 	if err != nil {
-		return fmt.Errorf("Invalid recipient: %s", recipient)
+		return fmt.Errorf("invalid recipient: %s", recipient)
 	}
 
 	r.currentRecipient = gift
@@ -78,7 +78,7 @@ func (r *Rotation) GetEligibleGivers(recipient string) (map[string]int, error) {
 	// fmt.Println("TEST: ", recipient)
 	recipient = NormalizeName(recipient)
 	if !r.Members[recipient] || r.Recipients[recipient] == nil {
-		return nil, fmt.Errorf("Invalid Recipient: %s", recipient)
+		return nil, fmt.Errorf("invalid Recipient: %s", recipient)
 	}
 
 	gift := r.Recipients[recipient]

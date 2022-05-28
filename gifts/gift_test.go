@@ -238,9 +238,9 @@ func TestGift_GetCurrentRotationIndex(t *testing.T) {
 			name: "3_different",
 			fields: fields{
 				GiverLookup: map[string]*Giver{
-					"jill":  &Giver{Count: 1},
-					"jen":   &Giver{Count: 2},
-					"james": &Giver{Count: 3},
+					"jill":  {Count: 1},
+					"jen":   {Count: 2},
+					"james": {Count: 3},
 				},
 			},
 			want: 1,
@@ -249,9 +249,9 @@ func TestGift_GetCurrentRotationIndex(t *testing.T) {
 			name: "2_matching",
 			fields: fields{
 				GiverLookup: map[string]*Giver{
-					"jill":  &Giver{Count: 1},
-					"jen":   &Giver{Count: 2},
-					"james": &Giver{Count: 1},
+					"jill":  {Count: 1},
+					"jen":   {Count: 2},
+					"james": {Count: 1},
 				},
 			},
 			want: 1,
@@ -260,9 +260,9 @@ func TestGift_GetCurrentRotationIndex(t *testing.T) {
 			name: "all_the_same",
 			fields: fields{
 				GiverLookup: map[string]*Giver{
-					"jill":  &Giver{Count: 1},
-					"jen":   &Giver{Count: 1},
-					"james": &Giver{Count: 1},
+					"jill":  {Count: 1},
+					"jen":   {Count: 1},
+					"james": {Count: 1},
 				},
 			},
 			want: 1,

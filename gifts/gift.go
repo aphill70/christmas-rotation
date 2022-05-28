@@ -35,7 +35,7 @@ func (g *Gift) GetGiver(giver string) *Giver {
 // NewGift creates a new Gift to calculate
 func NewGift(recipient string) (*Gift, error) {
 	if recipient == "" {
-		return nil, fmt.Errorf("Recipient must be non empty")
+		return nil, fmt.Errorf("recipient must be non empty")
 	}
 
 	return &Gift{

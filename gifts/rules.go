@@ -23,12 +23,12 @@ func NewRules(path string) (*Rules, error) {
 
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to read rules file: %v", err)
+		return nil, fmt.Errorf("failed to read rules file: %v", err)
 	}
 
 	err = json.NewDecoder(f).Decode(&rules)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to decode rules file: %v", err)
+		return nil, fmt.Errorf("failed to decode rules file: %v", err)
 	}
 
 	for _, household := range rules.Households {
