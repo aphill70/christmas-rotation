@@ -75,7 +75,7 @@ func (r *Rotation) AddGiver(giver, year string) error {
 
 // GetEligibleGivers returns all valid givers for a given recipient
 func (r *Rotation) GetEligibleGivers(recipient string) (map[string]int, error) {
-	fmt.Println("TEST: ", recipient)
+	// fmt.Println("TEST: ", recipient)
 	recipient = NormalizeName(recipient)
 	if !r.Members[recipient] || r.Recipients[recipient] == nil {
 		return nil, fmt.Errorf("Invalid Recipient: %s", recipient)
@@ -91,7 +91,7 @@ func (r *Rotation) GetEligibleGivers(recipient string) (map[string]int, error) {
 
 		giver := gift.GetGiver(member)
 		if giver == nil {
-			fmt.Println("New Giver: ", member)
+			// fmt.Println("New Giver: ", member)
 			eligibleMembers[member] = 0
 		} else {
 			eligibleMembers[member] = giver.Count
