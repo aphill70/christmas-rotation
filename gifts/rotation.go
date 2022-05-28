@@ -169,7 +169,7 @@ func (r *Rotation) GetNextYearsRotation(year string) {
 
 	sort.Sort(ByEligibleGiversCount(options))
 
-	fmt.Println("RESULTS: ", options)
+	// fmt.Println("RESULTS: ", options)
 
 	used := map[string]bool{}
 	for _, part := range options {
