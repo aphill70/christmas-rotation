@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/aphill70/sheet-rotation/persistence"
 )
 
@@ -10,11 +12,14 @@ func main() {
 	rotations, _ := sheet.GetRotations()
 
 	if len(rotations) > 0 {
-		rotations[0].GetNextYearsRotation("2020")
+		rotations[0].GetNextYearsRotation("2023")
 
-		rotations[1].GetNextYearsRotation("2020")
+		rotations[1].GetNextYearsRotation("2023")
 
-		sheet.WriteNewAssignments("2020", rotations)
+		fmt.Printf("%+v\n", rotations[0].RecipientToGiver)
+		fmt.Printf("%+v\n", rotations[1].RecipientToGiver)
+
+		sheet.WriteNewAssignments("2023", rotations)
 	}
 
 }
